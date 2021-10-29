@@ -1,0 +1,33 @@
+inputs:
+  version:
+    description: 'The version of buf to setup.'
+    required: true
+  github_token:
+    description: 'GitHub token to use when making API requests'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set git outputs
+      id: git-output
+      run: |
+        echo "::set-output name=short-sha::$(echo ${GITHUB_SHA} | cut -c1-8)"
+      shell: bash
+    - name: Setup Buf
+      uses: bufbuild/buf-setup-action@v0.6.0
+      with:
+        version: ${{ inputs.version }}
+        github_token: ${{ inputs.github_token }}
+    - name: Setup cache
+      uses: actions/cache@v2
+      with:
+        path: |
+          ~/.cache/buf
+          %LocalAppData%\buf
+        key: ${{ runner.os }}-buf-${{ inputs.version }}-${{ github.workflow }}-${{ github.job }}-${{ github.ref }}-${{ steps.git-output.outputs.short-sha }}
+        restore-keys: |
+          ${{ runner.os }}-buf-${{ inputs.version }}-${{ github.workflow }}-${{ github.job }}-${{ github.ref }}-${{ steps.git-output.outputs.short-sha }}
+          ${{ runner.os }}-buf-${{ inputs.version }}-${{ github.workflow }}-${{ github.job }}-${{ github.ref }}-
+          ${{ runner.os }}-buf-${{ inputs.version }}-${{ github.workflow }}-${{ github.job }}-refs/heads/main-
+          ${{ runner.os }}-buf-${{ inputs.version }}-${{ github.workflow }}-${{ github.job }}-refs/heads/master-
+          ${{ runner.os }}-buf-${{ inputs.version }}-${{ github.workflow }}-${{ github.job }}-
