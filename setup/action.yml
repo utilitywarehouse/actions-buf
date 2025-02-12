@@ -19,7 +19,7 @@ runs:
         version: ${{ inputs.version }}
         github_token: ${{ inputs.github_token }}
     - name: Setup cache
-      uses: actions/cache@v2
+      uses: actions/cache@v4
       with:
         path: |
           ~/.cache/buf
